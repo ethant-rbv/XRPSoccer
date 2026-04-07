@@ -1,0 +1,437 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@400;600&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0a0e1a; }
+  #app {
+    min-height: 700px;
+    background: #0a0e1a;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 2rem;
+    font-family: 'Rajdhani', sans-serif;
+    position: relative;
+    overflow: hidden;
+  }
+  #app::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% 50%, #0d2040 0%, #0a0e1a 70%);
+    z-index: 0;
+  }
+  .field-lines { position: absolute; inset: 0; z-index: 0; opacity: 0.07; }
+  .content { position: relative; z-index: 1; width: 100%; max-width: 1400px; }
+  .title {
+    text-align: center;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 22px;
+    letter-spacing: 8px;
+    color: #4a9eff;
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+  }
+  .scoreboard {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 0;
+    align-items: stretch;
+    margin-bottom: 1.5rem;
+  }
+  .team {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 2rem 2rem 1.5rem;
+    border-radius: 20px;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.1s;
+    user-select: none;
+  }
+  .team:active { transform: scale(0.97); }
+  .team-a { background: linear-gradient(135deg, #1a0a2e 0%, #150822 100%); border: 1px solid #5c2d9e; }
+  .team-b { background: linear-gradient(135deg, #001a2e 0%, #000f1e 100%); border: 1px solid #1a5c9e; }
+  .team-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 22px;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+  }
+  .team-a .team-label { color: #a855f7; }
+  .team-b .team-label { color: #38bdf8; }
+  .robot-icon { font-size: 72px; line-height: 1; }
+  .score {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 160px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -8px;
+  }
+  .team-a .score { color: #c084fc; text-shadow: 0 0 60px #a855f760; }
+  .team-b .score { color: #38bdf8; text-shadow: 0 0 60px #38bdf860; }
+  .key-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 18px;
+    border-radius: 8px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13px;
+    letter-spacing: 2px;
+    margin-top: 4px;
+  }
+  .team-a .key-chip { background: #a855f720; border: 1px solid #a855f760; color: #c084fc; }
+  .team-b .key-chip { background: #38bdf820; border: 1px solid #38bdf860; color: #38bdf8; }
+  .key-chip-letter {
+    font-size: 18px;
+    font-weight: 900;
+  }
+  .divider {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 0 2.5rem;
+  }
+  .vs-text { font-family: 'Orbitron', sans-serif; font-size: 22px; color: #ffffff30; letter-spacing: 3px; }
+  .divider-line { width: 1px; height: 100px; background: linear-gradient(to bottom, transparent, #ffffff20, transparent); }
+  .timer-section { text-align: center; margin-bottom: 1.5rem; }
+  .timer-display {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 96px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 8px;
+    line-height: 1;
+    transition: color 0.3s;
+  }
+  .timer-display.warning { color: #f59e0b; text-shadow: 0 0 40px #f59e0b80; }
+  .timer-display.danger { color: #ef4444; text-shadow: 0 0 40px #ef444480; }
+  .timer-display.done { color: #22c55e; }
+  .timer-status {
+    font-size: 16px;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    margin-top: 8px;
+    height: 22px;
+  }
+  .status-idle { color: #ffffff40; }
+  .status-running { color: #22c55e; }
+  .status-paused { color: #f59e0b; }
+  .status-done { color: #22c55e; }
+  .controls { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-bottom: 1.5rem; }
+  .btn {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 18px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 14px 36px;
+    border-radius: 10px;
+    border: 1px solid;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .btn:active { transform: scale(0.96); }
+  .btn-timer { color: #22c55e; border-color: #22c55e60; background: #22c55e12; }
+  .btn-timer:hover { background: #22c55e25; border-color: #22c55e90; }
+  .btn-reset { color: #f59e0b; border-color: #f59e0b60; background: #f59e0b12; }
+  .btn-reset:hover { background: #f59e0b25; border-color: #f59e0b90; }
+  .btn-key {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 5px;
+    border: 1px solid currentColor;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    opacity: 0.7;
+  }
+  .key-hints {
+    display: flex;
+    gap: 0;
+    justify-content: center;
+    border: 1px solid #ffffff15;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #ffffff05;
+  }
+  .key-hint {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 28px;
+    font-size: 15px;
+    color: #ffffff70;
+    letter-spacing: 1px;
+    border-right: 1px solid #ffffff10;
+  }
+  .key-hint:last-child { border-right: none; }
+  .key-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 7px;
+    border: 2px solid #ffffff35;
+    background: #ffffff12;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .key-hint-alpha .key-badge { border-color: #a855f780; background: #a855f720; color: #c084fc; }
+  .key-hint-beta .key-badge { border-color: #38bdf880; background: #38bdf820; color: #38bdf8; }
+  .key-hint-start .key-badge { border-color: #22c55e80; background: #22c55e20; color: #22c55e; }
+  .key-hint-reset .key-badge { border-color: #f59e0b80; background: #f59e0b20; color: #f59e0b; }
+  .flash-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: 20px;
+    opacity: 0;
+    transition: opacity 0.05s;
+  }
+  .team-a .flash-overlay { background: #a855f745; }
+  .team-b .flash-overlay { background: #38bdf845; }
+  .team.flash .flash-overlay { opacity: 1; }
+  .match-over-banner {
+    display: none;
+    text-align: center;
+    padding: 14px 32px;
+    border-radius: 12px;
+    background: #22c55e18;
+    border: 1px solid #22c55e50;
+    color: #22c55e;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 20px;
+    letter-spacing: 5px;
+    margin-bottom: 1.5rem;
+  }
+  .match-over-banner.visible { display: block; }
+</style>
+
+<div id="app">
+  <svg class="field-lines" viewBox="0 0 700 480" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="350" cy="240" r="80" stroke="white" stroke-width="1" fill="none"/>
+    <line x1="350" y1="40" x2="350" y2="440" stroke="white" stroke-width="1"/>
+    <rect x="40" y="160" width="80" height="160" stroke="white" stroke-width="1" fill="none"/>
+    <rect x="580" y="160" width="80" height="160" stroke="white" stroke-width="1" fill="none"/>
+    <circle cx="350" cy="240" r="3" fill="white"/>
+  </svg>
+
+  <div class="content">
+    <div class="title">&#9889; Robot Soccer &#9889;</div>
+    <div class="match-over-banner" id="bannerEl"></div>
+    <div class="scoreboard">
+      <div class="team team-a" id="teamA" onclick="addScore('a')">
+        <div class="flash-overlay"></div>
+        <div class="team-label">Alpha</div>
+        <div class="robot-icon">&#129302;</div>
+        <div class="score" id="scoreA">0</div>
+        <div class="key-chip"><span class="key-chip-letter">A</span> SCORE GOAL</div>
+      </div>
+      <div class="divider">
+        <div class="divider-line"></div>
+        <div class="vs-text">VS</div>
+        <div class="divider-line"></div>
+      </div>
+      <div class="team team-b" id="teamB" onclick="addScore('b')">
+        <div class="flash-overlay"></div>
+        <div class="team-label">Beta</div>
+        <div class="robot-icon">&#129302;</div>
+        <div class="score" id="scoreB">0</div>
+        <div class="key-chip"><span class="key-chip-letter">B</span> SCORE GOAL</div>
+      </div>
+    </div>
+
+    <div class="timer-section">
+      <div class="timer-display" id="timerDisplay">2:00</div>
+      <div class="timer-status status-idle" id="timerStatus">PRESS S TO START</div>
+    </div>
+
+    <div class="controls">
+      <button class="btn btn-timer" id="btnTimer" onclick="toggleTimer()">
+        <span class="btn-key">S</span> Start Match
+      </button>
+      <button class="btn btn-reset" onclick="resetAll()">
+        <span class="btn-key">R</span> Reset All
+      </button>
+    </div>
+
+    <div class="key-hints">
+      <div class="key-hint key-hint-alpha"><span class="key-badge">A</span> Alpha scores</div>
+      <div class="key-hint key-hint-start"><span class="key-badge">S</span> Start / Pause</div>
+      <div class="key-hint key-hint-reset"><span class="key-badge">R</span> Reset</div>
+      <div class="key-hint key-hint-beta"><span class="key-badge">B</span> Beta scores</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const MATCH_DURATION = 120;
+let scores = { a: 0, b: 0 };
+let timeLeft = MATCH_DURATION;
+let running = false;
+let interval = null;
+let matchOver = false;
+let audioCtx = null;
+
+function getAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function beep(freq, duration, type = 'sine', vol = 0.7, delay = 0) {
+  try {
+    const ctx = getAudio();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
+    gain.gain.setValueAtTime(vol, ctx.currentTime + delay);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + duration);
+    osc.start(ctx.currentTime + delay);
+    osc.stop(ctx.currentTime + delay + duration + 0.05);
+  } catch(e) {}
+}
+
+function playWarning30() {
+  beep(660, 0.2, 'sine', 0.75, 0);
+  beep(880, 0.3, 'sine', 0.75, 0.25);
+  beep(1100, 0.3, 'sine', 0.7, 0.55);
+}
+
+function playCountdownBeep() {
+  beep(500, 0.15, 'square', 0.65, 0);
+}
+
+function playFinalBeep() {
+  beep(330, 0.18, 'square', 0.7, 0);
+  beep(660, 0.18, 'square', 0.7, 0.2);
+  beep(880, 0.18, 'square', 0.7, 0.4);
+  beep(1320, 0.6, 'square', 0.75, 0.6);
+}
+
+const scoreAEl = document.getElementById('scoreA');
+const scoreBEl = document.getElementById('scoreB');
+const timerEl = document.getElementById('timerDisplay');
+const statusEl = document.getElementById('timerStatus');
+const btnTimer = document.getElementById('btnTimer');
+const teamAEl = document.getElementById('teamA');
+const teamBEl = document.getElementById('teamB');
+const bannerEl = document.getElementById('bannerEl');
+
+function formatTime(s) {
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return m + ':' + String(sec).padStart(2, '0');
+}
+
+function updateTimerDisplay() {
+  timerEl.textContent = formatTime(timeLeft);
+  timerEl.className = 'timer-display';
+  if (matchOver) timerEl.classList.add('done');
+  else if (timeLeft <= 10) timerEl.classList.add('danger');
+  else if (timeLeft <= 30) timerEl.classList.add('warning');
+}
+
+function toggleTimer() {
+  if (matchOver) return;
+  if (running) {
+    clearInterval(interval);
+    running = false;
+    statusEl.textContent = 'PAUSED';
+    statusEl.className = 'timer-status status-paused';
+    btnTimer.innerHTML = '<span class="btn-key">S</span> Resume';
+  } else {
+    running = true;
+    statusEl.textContent = 'MATCH RUNNING';
+    statusEl.className = 'timer-status status-running';
+    btnTimer.innerHTML = '<span class="btn-key">S</span> Pause';
+    interval = setInterval(() => {
+      timeLeft--;
+      updateTimerDisplay();
+      if (timeLeft === 30) playWarning30();
+      else if (timeLeft > 0 && timeLeft <= 10) playCountdownBeep();
+      if (timeLeft <= 0) {
+        clearInterval(interval);
+        running = false;
+        matchOver = true;
+        timeLeft = 0;
+        updateTimerDisplay();
+        statusEl.textContent = 'MATCH OVER';
+        statusEl.className = 'timer-status status-done';
+        btnTimer.innerHTML = '&#10003; Finished';
+        btnTimer.disabled = true;
+        playFinalBeep();
+        showResult();
+      }
+    }, 1000);
+  }
+}
+
+function showResult() {
+  let msg;
+  if (scores.a > scores.b) msg = '🏆 ALPHA WINS!';
+  else if (scores.b > scores.a) msg = '🏆 BETA WINS!';
+  else msg = "🤝 IT'S A DRAW!";
+  bannerEl.textContent = msg;
+  bannerEl.classList.add('visible');
+}
+
+function addScore(team) {
+  if (matchOver) return;
+  scores[team]++;
+  if (team === 'a') { scoreAEl.textContent = scores.a; flashTeam(teamAEl); }
+  else { scoreBEl.textContent = scores.b; flashTeam(teamBEl); }
+}
+
+function flashTeam(el) {
+  el.classList.add('flash');
+  setTimeout(() => el.classList.remove('flash'), 200);
+}
+
+function resetAll() {
+  clearInterval(interval);
+  running = false;
+  matchOver = false;
+  scores = { a: 0, b: 0 };
+  timeLeft = MATCH_DURATION;
+  scoreAEl.textContent = '0';
+  scoreBEl.textContent = '0';
+  updateTimerDisplay();
+  statusEl.textContent = 'PRESS S TO START';
+  statusEl.className = 'timer-status status-idle';
+  btnTimer.innerHTML = '<span class="btn-key">S</span> Start Match';
+  btnTimer.disabled = false;
+  bannerEl.classList.remove('visible');
+}
+
+document.addEventListener('keydown', (e) => {
+  const tag = document.activeElement.tagName;
+  if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+  if (e.key.toLowerCase() === 's') { e.preventDefault(); toggleTimer(); }
+  else if (e.key.toLowerCase() === 'a') addScore('a');
+  else if (e.key.toLowerCase() === 'b') addScore('b');
+  else if (e.key.toLowerCase() === 'r') resetAll();
+});
+
+updateTimerDisplay();
+</script>
